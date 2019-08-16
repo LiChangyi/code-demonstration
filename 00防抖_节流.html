@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>00防抖_节流</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    h2 {
+      text-align: center;
+      height: 72px;
+      line-height: 72px;
+    }
+    .result-wrap {
+      display: flex;
+    }
+
+    .result-box {
+      flex: 1;
+      overflow: hidden;
+      border: 1px solid #eee;
+    }
+
+    .result-box > div {
+      height: 400px;
+      overflow: auto;
+    }
+
+    .result-box+.result-box {
+      border-left: 0;
+    }
+
+    .mouse-move-box {
+      background-color: yellow;
+      width: 1200px;
+      margin: 24px auto;
+      height: 250px;
+      text-align: center;
+      line-height: 250px;
+      font-size: 48px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>防抖与节流</h2>
+  <div class="result-wrap">
+    <div class="result-box">
+      <h3>正常事件触发(<span id="normal-count">0</span>)次</h3>
+      <div id="normal-box"></div>
+    </div>
+    <div class="result-box normal">
+      <h3>防抖事件触发(<span id="debounce-count">0</span>)次</h3>
+      <div id="debounce-box"></div>
+    </div>
+    <div class="result-box normal">
+      <h3>节流事件触发(<span id="throttle-count">0</span>)次</h3>
+      <div id="throttle-box"></div>
+    </div>
+  </div>
+  <div class="mouse-move-box" id="mouse-box">鼠标移动触发事件</div>
+  <script>
+    /**
+     * 简单手写防抖函数
+     * @param { Function } func 需要进行包装的函数
+     * @param { number } [ wait = 0 ] 延迟的时间(毫秒)
+     * @returns 返回一个包装好的函数
+     */
+    function debounce(func, wait = 0) {
+      if (typeof func !== 'function') {
+        throw new TypeError('防抖函数第一个参数应该是一个函数');
+      }
+      let timer = null;
+      return (...args) => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+        timer = setTimeout(() => {
+          func.apply(this, args);
+        }, wait);
+      }
+    }
+    /*
+    * 简单手写节流函数
+    * @param { Function } func 需要进行包装的函数
+    * @param { number } [ wait = 0 ] 延迟的时间(毫秒)
+    * @returns 返回一个包装好的函数
+    */
+    function throttle(func, wait = 0) {
+      let mark = true;
+      return (...args) => {
+        if (!mark) {
+          return
+        }
+        mark = false;
+        setTimeout(() => {
+          func.apply(this, args);
+          mark = true;
+        }, wait);
+      }
+    }
+    // 下面的代码只是为了测试，可以不用看
+    const mouseBox = document.getElementById('mouse-box');
+    const normalBox = document.getElementById('normal-box');
+    const debounceBox = document.getElementById('debounce-box');
+    const throttleBox = document.getElementById('throttle-box');
+    const normalCountDom = document.getElementById('normal-count');
+    const debounceCountDom = document.getElementById('debounce-count');
+    const throttleCountDom = document.getElementById('throttle-count');
+
+    const startAt = new Date();
+    let normalCount = 0;
+    let debounceCount = 0;
+    let throttleCount = 0;
+    
+    mouseBox.addEventListener('mousemove', () => {
+      const now = new Date();
+      normalBox.innerHTML += `${now - startAt}<br />`;
+      normalCountDom.innerText = ++normalCount;
+    })
+    const debounceFn = debounce(() => {
+      const now = new Date();
+      debounceBox.innerHTML += `${now - startAt}<br />`;
+      debounceCountDom.innerText = ++debounceCount;
+    }, 200)
+    mouseBox.addEventListener('mousemove', debounceFn);
+    const throttleFn = throttle(() => {
+      const now = new Date();
+      throttleBox.innerHTML += `${now - startAt}<br />`;
+      throttleCountDom.innerText = ++throttleCount;
+    }, 200)
+    mouseBox.addEventListener('mousemove', throttleFn);
+  </script>
+</body>
+
+</html>
