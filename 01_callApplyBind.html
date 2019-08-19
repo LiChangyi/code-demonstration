@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>call apply bind 的实现</title>
+</head>
+<body>
+  <h2>call apply bind</h2>
+  <p>这里请打开控制台查看 console.log 查看结果</p>
+  <script>
+    // 这里 必须写成 var ，const 和 let 不会在 添加到　window　对象上
+    var name = "window";
+    const obj = {
+      name: 'obj',
+      say: function(firstArg, ...rest) {
+        console.log(`我的名字是 => ${this.name}`);
+        console.log(`第一个参数 => ${firstArg}`);
+        rest.length && console.log(`其他参数 ${rest}`);
+      }
+    }
+    obj.say(1);
+    const fn = obj.say;
+    fn(2);
+    console.log('---------call---------');
+    fn.call(obj, [1,2,3],  [4,5,6])
+    console.log('---------apply---------');
+    fn.apply(obj, [1,2,3])
+    // ｂind　函数不是立即执行的
+    console.log('---------bind---------');
+    fn.bind(obj)([1,2,3], 4,5,6);
+    // 简单实现
+    Function.prototype.myCall = function (context, ...args) {
+      // 默认指向 window
+      context = context || window;
+      // 这里的 this 就是我们需要执行的函数
+      // 这里使用 symbol 防止与原有属性冲突
+      const fnName = Symbol('fn');
+      context[fnName] = this;
+      const result = context[fnName](...args);
+      // 删除我们附加的 fn 保存原对象干净
+      delete context[fnName];
+      // 返回函数执行返回值
+      return result;
+    }
+    // apply 只能接受2个参数 this 和 args
+    Function.prototype.myApply = function (context, args) {
+      context = context || window;
+      const fnName = Symbol('fn');
+      context[fnName] = this;
+      const result = context[fnName](...args);
+      delete context[fnName];
+      return result;
+    }
+    // bind 不是立即执行的，故返回的肯定是一个函数
+    Function.prototype.myBind = function(context, ...args) {
+      context = context || window;
+      // 如果这里不用箭头函数，就要将里面的 this 替换为外部 this
+      const fnBind = (...bindArgs) => {
+        bindArgs = args.concat(bindArgs);
+        const fnName = Symbol('fn');
+        context[fnName] = this;
+        const result = context[fnName](...bindArgs);
+        delete context[fnName];
+        return result; 
+      }
+      // 维护原型关系
+      // 这里 FInherit 是一个空函数，但是不能采用箭头函数声明，否则找不到 constructor
+      const FInherit = function (){};
+      FInherit.prototype = this.prototype;
+      fnBind.prototype = new FInherit();
+      return fnBind;
+    }
+
+    console.log('---------myCall---------')
+    fn.myCall(Object(obj), [1,2,3], [4,5,6])
+    console.log('---------myApply---------')
+    fn.myApply(obj, [1,2,3])
+    console.log('---------myBind---------')
+    fn.myBind(obj)([1,2,3], 4,5,6)
+  </script>
+</body>
+</html>

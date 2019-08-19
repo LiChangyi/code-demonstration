@@ -81,19 +81,25 @@
     <div id="link-wrap" class="link-wrap">
     </div>
   </div>
-  <iframe id="iframe" class="main" src="00防抖_节流.html"></iframe>
+  <iframe id="iframe" class="main" src=""></iframe>
 
   <script>
     const NAVS = [
-      { title: '00 防抖_节流', src: '00防抖_节流.html' },
+      { title: '00 防抖和节流', src: '00_防抖和节流.html' },
+      { title: '01 callApplyBind', src: '01_callApplyBind.html' }
     ]
+    
 
     const linkWrapDom = document.getElementById('link-wrap');
     const iframeDom = document.getElementById('iframe');
 
+    // 页面初始化选择
+    let show = Number(window.location.hash.slice(1)) || 0;
+    iframeDom.src = NAVS[show] ? NAVS[show].src: NAVS[0].src;
+
     let html = '';
-    NAVS.forEach(({ title, src }) => {
-      html += `<span class="link" data-src="${src}">${title}</span>`;
+    NAVS.forEach(({ title, src }, index) => {
+      html += `<span class="link" data-index="${index}">${title}</span>`;
     })
     linkWrapDom.innerHTML = html;
 
@@ -101,8 +107,11 @@
     linkWrapDom.addEventListener('click', (e) => {
       const node = e.target;
       if (node.className !== 'link') return;
-      const { src } = node.dataset;
-      iframeDom.src = src;
+      const { index } = node.dataset;
+      if (show === index) return;
+      show = index;
+      iframeDom.src = NAVS[index] ? NAVS[index].src: NAVS[0].src;
+      window.location.hash = `#${index}`;
     })
   </script>
 </body>
