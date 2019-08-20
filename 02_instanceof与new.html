@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>instanceof与new</title>
+</head>
+<body>
+  <h2>instanceof与new实现</h2>
+  <p>这里请打开控制台查看 console.log 查看测试结果</p>
+  <script>
+    // ---------------- instanceof ----------------
+    // 类似与 L instanceof R
+    const myInstanceof = (L, constructor) => {
+      let RPrototype = constructor.prototype;
+      while (true) {
+        if (L === null || L === undefined ) {
+          // 已经找到最顶层了，还是没有找到，说明不属于
+          return false;
+        }
+        if (RPrototype === L) {
+          // 用三等说明是同一个，说明已经找到了
+          return true;
+        }
+        // 如果都不满足，那继续 L 的原型上找
+        L = L.__proto__;
+      }
+    }
+    // 代码测试
+    console.log('--------MDN中例子 instanceof 测试--------')
+    console.log('instanceof语句---instanceof 结果---myInstanceof 结果')
+    const simpleStr = "This is a simple string"; 
+    const myString = new String();
+    const newStr = new String("String created with constructor");
+    const myDate = new Date();
+    const myObj = {};
+    const myNonObj = Object.create(null);
+    // 这里不一样，查阅资料暂时不知道什么问题，难受
+    // Object.getPrototypeOf(simpleStr) === String.prototype 也为 true
+    // 故个人初步理解为，在 instanceof 底层是把 simpleStr 当成字面量进行处理，没有当成对象，故没有原型
+    // 同样的 还有 1 instanceof Number, true instanceof Boolean，JS 真坑
+    console.log('simpleStr instanceof String', simpleStr instanceof String, myInstanceof(simpleStr, String));
+    console.log('myString instanceof String', myString instanceof String, myInstanceof(myString, String));
+    console.log('newStr instanceof String', newStr instanceof String, myInstanceof(newStr, String));
+    console.log('myString instanceof Object', myString instanceof Object, myInstanceof(myString, Object));
+
+    console.log('myObj instanceof Object', myObj instanceof Object, myInstanceof(myObj, Object));
+    console.log('({}) instanceof Object', ({}) instanceof Object, myInstanceof(({}), Object));
+    console.log('myNonObj instanceof Object', myNonObj instanceof Object, myInstanceof(myNonObj, Object));
+
+    console.log('myString instanceof Date', myString instanceof Date, myInstanceof(myString, Date));
+
+    console.log('myDate instanceof Date', myDate instanceof Date, myInstanceof(myDate, Date));
+    console.log('myDate instanceof Object', myDate instanceof Object, myInstanceof(myDate, Object));
+    console.log('myDate instanceof String', myDate instanceof String, myInstanceof(myDate, String));
+
+
+    // ---------------- new ----------------
+    const myNew = (CL, ...args) => {
+      // 第一步 创建空对象
+      let obj = {};
+      // 第二步 链接此对象
+      obj = Object.create(CL.prototype);
+      // 第三步 修正 this, 及执行构造函数的构造器，把初始化属性
+      let ret = CL.apply(obj, args);
+      // 第四步 返回this
+      return typeof ret === 'object' ? ret : obj ;
+    }
+    // 代码测试
+    console.log('------------ new 测试-------------')
+    function Stu(name, age) {
+      this.name = name;
+      this.age = age;
+    }
+    Stu.prototype.say = function() {
+      console.log(`hello，我的名字是${this.name}，我今年${this.age}岁！`);
+    }
+    const stu1 = new Stu('pawn', 22);
+    const stu2 = myNew(Stu, 'licy', 22);
+    stu1.say();
+    stu2.say();
+    console.log(stu2.__proto__ === stu1.__proto__)
+  </script>
+</body>
+</html>
