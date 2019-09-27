@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>布局</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    .layout>div {
+      min-height: 100px;
+    }
+    section + section {
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <h1>目标：高度固定，左右300px 中间自适应，dom 结构为 div.left div.right div.center</h1>
+  <section class="layout float">
+    <style>
+      .float-left {
+        width: 300px;
+        background: blue;
+        float: left;
+      }
+      .float-right {
+        width: 300px;
+        background: green;
+        float: right;
+      }
+      .float-center {
+        background: yellow;
+        margin: 0 300px;
+        /* 保证 BFC。 不加bfc的话，当中间的高度超过2辺时，则会显示在2辺的下面 */
+        /* overflow: hidden; */
+      }
+    </style>
+    <div class="float-left">左边</div>
+    <div class="float-right">右边</div>
+    <div class="float-center">
+      <h2>float 方法实现</h2>
+      方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方
+    </div>
+  </section>
+  <section class="layout position">
+    <style>
+      .position {
+        position: relative;
+      }
+      .position-left {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: blue;
+        width: 300px;
+      }
+      .position-right {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: green;
+        width: 300px;
+      }
+      .position-center {
+        /* 这里中间不能用定位，否则导致，父级没有高度 */
+        background: yellow;
+        margin: 0 300px;
+      }
+    </style>
+    <div class="position-left">左边</div>
+    <div class="position-right">右边</div>
+    <div class="position-center">
+      <h2>position 定位实现</h2>
+      方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方法实现方
+    </div>
+  </section>
+  <section class="layout flex">
+    <style>
+      /* 采用 order 来调整顺序 */
+      .flex {
+        display: flex;
+      }
+      .flex-left {
+        width: 300px;
+        min-height: 100px;
+        background: blue;
+        order: 0;
+      }
+      .flex-right {
+        width: 300px;
+        min-height: 300px;
+        background: green;
+        order: 2;
+      }
+      .flex-center {
+        flex: 1;
+        background: yellow;
+        order: 1;
+      }
+    </style>
+    <div class="flex-left">左边</div>
+    <div class="flex-right">右边</div>
+    <div class="flex-center">
+      <h2>flex 方法实现</h2>
+      flex 方法实现flex 方法实现flex 方法实现flex 方法实现flex 方法实现flex 方法实现flex 方法实现flex 方法实现flex 方法实现flex 方法实现flex 方法实现flex 方法实现flex 方法实现
+    </div>
+  </section>
+  <section class="layout grid">
+      <style>
+        /* 采用 areas 来调整顺序 */
+        .grid {
+          display: grid;
+          grid-template-columns: 300px auto 300px;
+          grid-template-areas: 'a b c';
+        }
+        .grid-left {
+          background: blue;
+          grid-area: a;
+        }
+        .grid-right {
+          background: green;
+          grid-area: c;
+        }
+        .grid-center {
+          background: yellow;
+          grid-area: b;
+        }
+      </style>
+      <div class="grid-left">左边</div>
+      <div class="grid-right">右边</div>
+      <div class="grid-center">
+        <h2>grid 方法实现</h2>
+        grid 方法实现grid 方法实现grid 方法实现grid 方法实现grid 方法实现grid 方法实现grid 方法实现grid 方法实现grid 方法实现grid 方法实现grid 方法实现grid 方法实现grid 方法实现
+      </div>
+    </section>
+</body>
+</html>
