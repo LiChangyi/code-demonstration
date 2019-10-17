@@ -32,8 +32,21 @@
     fn.bind(obj)([1,2,3], 4,5,6);
     // 简单实现
     Function.prototype.myCall = function (context, ...args) {
-      // 默认指向 window
-      context = context || window;
+      // context 处理 默认指向 window
+      if (context === undefined || context === null) {
+        context = window;
+      }
+      const type = typeof obj;
+			if (type === 'number') {
+				context = new Number();
+			}
+			if (type === 'string') {
+				context = new String();
+			}
+			if (type === 'boolean') {
+				context = new Boolean();
+			}
+
       // 这里的 this 就是我们需要执行的函数
       // 这里使用 symbol 防止与原有属性冲突
       const fnName = Symbol('fn');
@@ -46,7 +59,26 @@
     }
     // apply 只能接受2个参数 this 和 args
     Function.prototype.myApply = function (context, args) {
-      context = context || window;
+      if (!Array.isArray(args)) {
+				console.error('args 应该接受一个数组');
+				return;
+			}
+      
+      // context 处理 默认指向 window
+      if (context === undefined || context === null) {
+        context = window;
+      }
+      const type = typeof obj;
+			if (type === 'number') {
+				context = new Number();
+			}
+			if (type === 'string') {
+				context = new String();
+			}
+			if (type === 'boolean') {
+				context = new Boolean();
+			}
+
       const fnName = Symbol('fn');
       context[fnName] = this;
       const result = context[fnName](...args);
@@ -55,7 +87,21 @@
     }
     // bind 不是立即执行的，故返回的肯定是一个函数
     Function.prototype.myBind = function(context, ...args) {
-      context = context || window;
+      // context 处理 默认指向 window
+      if (context === undefined || context === null) {
+        context = window;
+      }
+      const type = typeof obj;
+			if (type === 'number') {
+				context = new Number();
+			}
+			if (type === 'string') {
+				context = new String();
+			}
+			if (type === 'boolean') {
+				context = new Boolean();
+			}
+
       // 如果这里不用箭头函数，就要将里面的 this 替换为外部 this
       const fnBind = (...bindArgs) => {
         bindArgs = args.concat(bindArgs);
