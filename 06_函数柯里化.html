@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>柯里化函数封装</title>
+</head>
+<body>
+  <h2>函数柯里化的封装，右键查看网页源代码</h2>
+  <p>这里请打开控制台查看 console.log 查看结果</p>
+  <script>
+    const add = (x, y, z) => {
+      return x + y + z;
+    };
+    const curry = (fn, ...args1) => {
+      const innerF = (...args2) => {
+        const _args = [...args1, ...args2];
+        if (_args.length >= fn.length) {
+          return fn(..._args);
+        } else {
+          // 参数个数不够，继续接受
+          return curry(fn, ..._args);
+        }
+      }
+      return innerF;
+    };
+    const curryAdd = curry(add);
+    console.log(curryAdd(1)(1, 2)); // 4
+    console.log(curryAdd(5)(6)(7)); // 18
+
+    // 先自定义一个参数
+    const curryAdd2 = curry(add, 2);
+    console.log(curryAdd2(2)(2)); // 6
+    console.log(curryAdd2(3)(5)); // 10
+
+    const user = [
+      {
+        name: 'licy',
+        age: 22
+      },
+      {
+        name: 'pawn',
+        age: 21
+      }
+    ];
+    const getProp = curry((key, obj) => {
+      return obj[key];
+    });
+    console.log(user.map(getProp('name'))); // ['licy', 'pawn']
+    console.log(user.map(getProp('age')));  // [22, 21]
+
+    /*
+      柯里化特别版： 参考 https://github.com/mqyqingfeng/Blog/issues/42
+      实现不是从左到右传参，有占位符占位
+    */
+    // 定义 _ 作为占位符号
+    const _ = {};
+    const curry2 = (fn, args = [], holes = []) => {
+      return (...rest) => {
+        let _args = [...args];
+        let _holes = [...holes];
+        let holeLength = holes.length;
+        rest.forEach((item, i) => {
+          if (item === _ && holeLength > 0) {
+            // _ 代表一个占位符
+            holeLength--;
+            // 这里把_holes的第一项变成最后一项，相当于起遍历作用。。核心。。
+            _holes.push(_holes.shift())
+          } else if (item === _) {
+            // 保存当前占位符的位置
+            // 注意这里的_args.length
+            _holes.push(_args.length + i);
+          } else if (holeLength > 0) {
+            // 如果存在hole同时，当前值不是_则代表传入了数据填充
+            holeLength--;
+            _args.splice(_holes.shift(), 0, item);
+          } else {
+            // 没有hole 直接讲参数放在_args后面
+            _args.push(item);
+          }
+        })
+        return _args.length >= fn.length       // 如果args已经接受完成则直接执行函数，否则递归
+          ? fn.apply(this, _args)
+          : curry2.call(this, fn, _args, _holes)
+      }
+    }
+    const say = (name, age, eat) => {
+      console.log(`我的名字是${name}，我今年${age}岁，我喜欢吃${eat}`);
+    };
+    const currySay = curry2(say);
+    // 以下三条语句打印全部为 我的名字是licy，我今年22岁，我喜欢吃香蕉
+    currySay('licy', 22, '香蕉');
+    currySay(_, 22)(_, '香蕉')('licy');
+    currySay(_, _, '香蕉')('licy')(22);
+
+    console.log('在函数柯里化时传入部分参数')
+    // 在函数柯里化时传入部分参数
+    // 因为我们传入的是 age 第二个参数，说明第一个参数是占位符，所以传入 [22] [0]
+    const say22 = curry2(say, [22], [0]);
+    say22('licy', '苹果');
+    say22('pawn', '西瓜');
+
+  </script>
+</body>
+</html>
