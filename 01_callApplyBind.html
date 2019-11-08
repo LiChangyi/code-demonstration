@@ -87,35 +87,19 @@
     }
     // bind 不是立即执行的，故返回的肯定是一个函数
     Function.prototype.myBind = function(context, ...args) {
-      // context 处理 默认指向 window
-      if (context === undefined || context === null) {
-        context = window;
-      }
-      const type = typeof obj;
-			if (type === 'number') {
-				context = new Number();
-			}
-			if (type === 'string') {
-				context = new String();
-			}
-			if (type === 'boolean') {
-				context = new Boolean();
-			}
-
-      // 如果这里不用箭头函数，就要将里面的 this 替换为外部 this
-      const fnBind = (...bindArgs) => {
-        bindArgs = args.concat(bindArgs);
+      const that = this;
+      const fnBind = function(...bindArgs) {
+        if (context === null) {
+          context = this;
+        }
         const fnName = Symbol('fn');
-        context[fnName] = this;
-        const result = context[fnName](...bindArgs);
+        context[fnName] = that;
+        const result = context[fnName](...args, ...bindArgs);
         delete context[fnName];
         return result; 
       }
       // 维护原型关系
-      // 这里 FInherit 是一个空函数，但是不能采用箭头函数声明，否则找不到 constructor
-      const FInherit = function (){};
-      FInherit.prototype = this.prototype;
-      fnBind.prototype = new FInherit();
+      fnBind.prototype = Object.create(this.prototype);
       return fnBind;
     }
 
@@ -125,6 +109,7 @@
     fn.myApply(obj, [1,2,3])
     console.log('---------myBind---------')
     fn.myBind(obj)([1,2,3], 4,5,6)
+    fn.myBind(null)([1,2,3], 4,5,6)
   </script>
 </body>
 </html>
